@@ -774,59 +774,17 @@
 
         // --- Q&A CSV logic (Frontend Only) ---
         // Simulated Q&A data
-        const diseaseAnswers = [
-            [
-                '🍅 Tomato Disease 1 – Early Blight',
-                '🔍',
-                '<br><br>📌 <b>Diagnosis:</b> The plant is showing signs of <b>Early Blight</b> (caused by <i>Alternaria solani</i>).',
-                '<br><br>✅ <b>Symptoms Identified:</b><ul style="margin-left:1em;list-style:disc;"><li>Dark brown spots with concentric rings on lower leaves</li><li>Yellowing around the spots</li><li>Premature leaf drop</li></ul>',
-                '<br>🦠 <b>Cause:</b> This fungal disease thrives in warm, humid conditions and spreads via wind or water splash.',
-                '<br><br>🛠 <b>Suggested Solution:</b><ol style="margin-left:1em;list-style:decimal;"><li>Remove affected leaves and dispose of them properly.</li><li>Avoid overhead watering to keep foliage dry.</li><li>Apply fungicides like Copper-based sprays or Chlorothalonil.</li><li>Practice crop rotation and use disease-resistant tomato varieties.</li></ol>',
-                '<br>🕒 <b>Act promptly!</b> Early Blight can reduce yield and fruit quality fast. Want a reminder for the next fungicide application?'
-            ],
-            [
-                '🍅 Tomato Disease 2 – Late Blight',
-                '🔍',
-                '<br><br>📌 <b>Diagnosis:</b> The tomato plant shows symptoms of <b>Late Blight</b> (caused by <i>Phytophthora infestans</i>).',
-                '<br><br>✅ <b>Symptoms Identified:</b><ul style="margin-left:1em;list-style:disc;"><li>Large, irregular gray-green spots on leaves</li><li>White mold growth on leaf undersides</li><li>Dark, sunken lesions on fruits and stems</li></ul>',
-                '<br>🦠 <b>Cause:</b> A water mold pathogen that spreads rapidly in cool, moist environments.',
-                '<br><br>🛠 <b>Suggested Solution:</b><ol style="margin-left:1em;list-style:decimal;"><li>Immediately remove and destroy infected plants.</li><li>Improve air circulation and avoid overhead watering.</li><li>Apply systemic fungicides such as Metalaxyl or Mancozeb.</li><li>Use certified disease-free seeds and resistant varieties.</li></ol>',
-                '<br>🕒 <b>Take immediate action!</b> Late Blight can devastate entire tomato crops if not controlled early.'
-            ],
-            [
-                '🥔 Potato Disease 1 – Late Blight',
-                '🔍',
-                '<br><br>📌 <b>Diagnosis:</b> The potato plant is affected by <b>Late Blight</b> (caused by <i>Phytophthora infestans</i>).',
-                '<br><br>✅ <b>Symptoms Identified:</b><ul style="margin-left:1em;list-style:disc;"><li>Dark brown to black lesions on leaves and stems</li><li>White, fuzzy mold on undersides of infected leaves</li><li>Soft, brown rot in tubers with reddish borders</li></ul>',
-                '<br>🦠 <b>Cause:</b> This aggressive water mold spreads quickly in cool, wet conditions.',
-                '<br><br>🛠 <b>Suggested Solution:</b><ol style="margin-left:1em;list-style:decimal;"><li>Destroy infected plants and avoid composting them.</li><li>Use preventive fungicides like Chlorothalonil or Cyazofamid.</li><li>Improve drainage and avoid overcrowding of plants.</li><li>Plant certified seed potatoes and rotate crops annually.</li></ol>',
-                '<br>🕒 <b>Don\'t wait!</b> Late Blight can wipe out a potato crop within days if untreated.'
-            ],
-            [
-                '🥔 Potato Disease 2 – Blackleg',
-                '🔍',
-                '<br><br>📌 <b>Diagnosis:</b> The potato plant is affected by <b>Blackleg</b> (caused by <i>Pectobacterium atrosepticum</i>).',
-                '<br><br>✅ <b>Symptoms Identified:</b><ul style="margin-left:1em;list-style:disc;"><li>Black, slimy stem base near soil line</li><li>Yellowing and wilting of foliage</li><li>Soft rot in seed tubers and foul smell</li></ul>',
-                '<br>🦠 <b>Cause:</b> This bacterial disease thrives in wet, poorly drained soils and spreads via infected seed tubers.',
-                '<br><br>🛠 <b>Suggested Solution:</b><ol style="margin-left:1em;list-style:decimal;"><li>Use certified, disease-free seed potatoes.</li><li>Avoid overwatering and ensure proper soil drainage.</li><li>Remove and destroy infected plants immediately.</li><li>Disinfect tools and avoid working with wet plants.</li></ol>',
-                '<br>🕒 <b>Act quickly!</b> Blackleg can spread rapidly and ruin tuber development.'
-            ],
-            [
-                '🍅 Tomato Disease 3 – Healthy',
-                '🔍',
-                '<br><br>📌 <b>Diagnosis:</b> The tomato plant appears healthy with no visible disease symptoms.',
-                '<br><br>✅ <b>Symptoms Identified:</b><ul style="margin-left:1em;list-style:disc;"><li>Green, vibrant leaves</li><li>No spots or lesions</li><li>Strong stem and healthy fruit set</li></ul>',
-                '<br>🦠 <b>Cause:</b> No disease detected.',
-                '<br><br>🛠 <b>Suggested Solution:</b><ol style="margin-left:1em;list-style:decimal;"><li>Continue regular monitoring.</li><li>Maintain good cultural practices.</li><li>Ensure proper watering and nutrition.</li></ol>',
-                '<br>🕒 <b>Keep up the good work!</b> Healthy plants are less susceptible to disease.'
-            ]
+        let qnaData = [
+            { question: 'what is wheat rust?', answer: 'Wheat rust is a fungal disease affecting wheat crops, causing yellow-orange pustules on leaves.' },
+            { question: 'how to increase soil moisture?', answer: 'Increase soil moisture by irrigating the field and using mulching techniques.' },
+            { question: 'what is ndvi?', answer: 'NDVI stands for Normalized Difference Vegetation Index, used to assess crop health from drone imagery.' }
         ];
         function findAnswer(question) {
-            if (!diseaseAnswers.length) return null;
+            if (!qnaData.length) return null;
             const q = question.trim().toLowerCase();
-            for (const row of diseaseAnswers) {
-                if (row.length > 1 && row[0].trim().toLowerCase() === q) {
-                    return row.slice(1);
+            for (const row of qnaData) {
+                if (row.question && row.question.trim().toLowerCase() === q) {
+                    return row.answer;
                 }
             }
             return null;
@@ -843,36 +801,39 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
         chatSend.onclick = function() {
-            // If a photo was added, simulate 5 photo diagnoses
-            if (photoPreview.innerHTML.trim() !== '') {
-                let i = 0;
-                function showNextDiagnosis() {
-                    if (i < diseaseAnswers.length) {
-                        // Show the photo (simulate different photo for each, or reuse the same)
-                        appendMessage(`<img src="${photoPreview.querySelector('img').src}" alt="Photo ${i+1}" class="rounded shadow max-h-32 mb-2">`, 'user');
-                        // Show the diagnosis step by step
-                        let part = 0;
-                        function showPart() {
-                            if (part < diseaseAnswers[i].length) {
-                                appendMessage(diseaseAnswers[i][part], 'bot');
-                                part++;
-                                setTimeout(showPart, 700);
-                            } else {
-                                i++;
-                                setTimeout(showNextDiagnosis, 1200);
+            // Show loading first
+            appendMessage('<div class="flex items-center gap-2"><svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> Analyzing your plant image...</div>', 'bot');
+            
+            // Clear loading and show diagnosis step by step
+            setTimeout(() => {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.removeChild(chatBox.lastChild); // Remove loading message
+                
+                // Show diagnosis parts one by one
+                const diagnosisParts = [
+                    '🔍',
+                    '<br><br>📌 <b>Diagnosis:</b> The plant is showing signs of <b>Early Blight</b> (caused by <i>Alternaria solani</i>).',
+                    '<br><br>✅ <b>Symptoms Identified:</b><ul style="margin-left:1em;list-style:disc;"><li>Dark brown spots with concentric rings on lower leaves</li><li>Yellowing around the spots</li><li>Premature leaf drop</li></ul>',
+                    '<br>🦠 <b>Cause:</b> This fungal disease thrives in warm, humid conditions and spreads via wind or water splash.',
+                    '<br><br>🛠 <b>Suggested Solution:</b><ol style="margin-left:1em;list-style:decimal;"><li>Remove affected leaves and dispose of them properly.</li><li>Avoid overhead watering to keep foliage dry.</li><li>Apply fungicides like Copper-based sprays or Chlorothalonil.</li><li>Practice crop rotation and use disease-resistant tomato varieties.</li></ol>',
+                    '<br>🕒 <b>Act promptly!</b> Early Blight can reduce yield and fruit quality fast. Want a reminder for the next fungicide application?'
+                ];
+                
+                let currentMessage = '';
+                diagnosisParts.forEach((part, index) => {
+                    setTimeout(() => {
+                        currentMessage += part;
+                        appendMessage(currentMessage, 'bot');
+                        // Remove previous message if not the first part
+                        if (index > 0) {
+                            const chatBox = document.getElementById('chat-box');
+                            if (chatBox.children.length > 1) {
+                                chatBox.removeChild(chatBox.children[chatBox.children.length - 2]);
                             }
                         }
-                        showPart();
-                    }
-                }
-                showNextDiagnosis();
-                // Clear the photo preview after all
-                setTimeout(() => { photoPreview.innerHTML = ''; }, diseaseAnswers.length * 2500);
-            } else {
-                // Default: just send the text as before
-                appendMessage(chatInput.value, 'user');
-                // ... your existing logic for text Q&A
-            }
+                    }, index * 800); // 800ms delay between each part
+                });
+            }, 1500); // 1.5s delay before starting the diagnosis
         };
         chatInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') chatSend.click();
@@ -1263,7 +1224,5 @@
             <div class="text-xs text-gray-400">(real payment processed)</div>
         </div>
     </div>
-    <script src="disease_qna_data.js"></script>
-    <script src="question.js"></script>
 </body>
 </html>
