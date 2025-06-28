@@ -48,37 +48,19 @@ An interactive, real-time dashboard built for precision agriculture using ESP32,
 - *Leaflet.js* – GIS-based mapping  
 - *AI Models* – Image-based disease detection using ML  
 
-tech-harvesters-dashboard/
-│
-├── index.html                        # Main HTML file (Precision Farming Dashboard UI)
-├── style.css                         # Optional: Custom Tailwind overrides (can extract from <style> tag in HTML)
-├── script.js                         # Optional: Custom JS logic (can extract from inline script)
-│
-├── assets/                           # Static assets
-│   ├── images/                       # Crop images, avatars, illustrations
-│   └── icons/                        # FontAwesome icons or custom SVGs
-│
-├── libs/                             # External libraries (via CDN or local)
-│   ├── tailwindcss/                  # Tailwind CSS (via CDN)
-│   ├── leaflet/                      # Leaflet.js for GIS maps
-│   └── momentjs/                     # Moment.js for time formatting
-│
-├── firebase/                         # Firebase configuration
-│   ├── firebase-app.js               # Firebase app initialization
-│   └── firebase-database.js         # Realtime database configuration
-│
-├── components/                       # Modular JS components
-│   ├── chatbot.js                    # Smart Chatbot logic
-│   ├── ai-modules.js                # AI disease detection (image upload, prediction logic)
-│   └── predictive-analytics.js      # Simulated prediction logic & sensor updates
-│
-├── data/                             # Data resources
-│   ├── sensor_data.csv              # Downloadable sensor readings
-│   ├── crop_recommendation.csv      # Crop advice or fertilizer schedules
-│   ├── potato_leaf_dataset.csv      # Potato leaf classification data
-│   ├── tomato_leaf_dataset.csv      # Tomato leaf classification data
-│   └── farmer_disease_qa_10000.csv  # Q&A dataset for chatbot training
-│
-└── README.md                         # Project description, features, and setup guide
+                
+
+# Project description, features, and setup guide
+
+#How to use it:
+run in cmd 
+
+python backend.py
+test_modules.py
+generate csv.py or train_leaf_diseases_pytorch.py
+#browse into html directory
+run login.html
+# run it using local server or firebase domain
+create a firebase domain and connect the api's
 
 
