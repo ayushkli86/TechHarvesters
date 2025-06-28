@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Auth Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Firebase Auth Test</h1>
+        
+        <div id="authStatus" class="mb-4 p-3 rounded">
+            <p>Checking authentication status...</p>
+        </div>
+        
+        <div id="userInfo" class="mb-4 p-3 bg-gray-50 rounded" style="display: none;">
+            <h3 class="font-semibold">User Information:</h3>
+            <p id="userEmail"></p>
+            <p id="userUid"></p>
+        </div>
+        
+        <div class="space-y-2">
+            <button onclick="testLogin()" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                Test Login (test@example.com / password123)
+            </button>
+            <button onclick="testLogout()" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                Test Logout
+            </button>
+            <button onclick="checkAuth()" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                Check Auth Status
+            </button>
+        </div>
+        
+        <div class="mt-4">
+            <a href="login.html" class="text-blue-500 hover:underline">Go to Login Page</a>
+        </div>
+    </div>
+
+    <script>
+        const authStatus = document.getElementById('authStatus');
+        const userInfo = document.getElementById('userInfo');
+        const userEmail = document.getElementById('userEmail');
+        const userUid = document.getElementById('userUid');
+
+        // Check authentication status on page load
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                authStatus.innerHTML = '<p class="text-green-600">✅ User is authenticated</p>';
+                userInfo.style.display = 'block';
+                userEmail.textContent = 'Email: ' + user.email;
+                userUid.textContent = 'UID: ' + user.uid;
+            } else {
+                authStatus.innerHTML = '<p class="text-red-600">❌ User is not authenticated</p>';
+                userInfo.style.display = 'none';
+            }
+        });
+
+        function testLogin() {
+            auth.signInWithEmailAndPassword('test@example.com', 'password123')
+                .then((userCredential) => {
+                    console.log('Login successful:', userCredential.user);
+                    authStatus.innerHTML = '<p class="text-green-600">✅ Test login successful!</p>';
+                })
+                .catch((error) => {
+                    console.error('Login error:', error);
+                    authStatus.innerHTML = '<p class="text-red-600">❌ Login failed: ' + error.message + '</p>';
+                });
+        }
+
+        function testLogout() {
+            auth.signOut()
+                .then(() => {
+                    console.log('Logout successful');
+                    authStatus.innerHTML = '<p class="text-green-600">✅ Logout successful!</p>';
+                })
+                .catch((error) => {
+                    console.error('Logout error:', error);
+                    authStatus.innerHTML = '<p class="text-red-600">❌ Logout failed: ' + error.message + '</p>';
+                });
+        }
+
+        function checkAuth() {
+            const user = auth.currentUser;
+            if (user) {
+                authStatus.innerHTML = '<p class="text-green-600">✅ Current user: ' + user.email + '</p>';
+            } else {
+                authStatus.innerHTML = '<p class="text-red-600">❌ No user currently signed in</p>';
+            }
+        }
+    </script>
+</body>
+</html> 

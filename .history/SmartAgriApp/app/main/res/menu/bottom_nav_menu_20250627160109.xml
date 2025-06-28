@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="@string/dashboard" />
+    <item
+        android:id="@+id/nav_iot"
+        android:icon="@drawable/ic_iot"
+        android:title="@string/iot_sensor" />
+    <item
+        android:id="@+id/nav_crop"
+        android:icon="@drawable/ic_crop"
+        android:title="@string/crop_recommendation" />
+    <item
+        android:id="@+id/nav_disease"
+        android:icon="@drawable/ic_disease"
+        android:title="@string/disease_detection" />
+    <item
+        android:id="@+id/nav_irrigation"
+        android:icon="@drawable/ic_irrigation"
+        android:title="@string/irrigation_alert" />
+    <item
+        android:id="@+id/nav_marketplace"
+        android:icon="@drawable/ic_marketplace"
+        android:title="@string/marketplace" />
+</menu> 

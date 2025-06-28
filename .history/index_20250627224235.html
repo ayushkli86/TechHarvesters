@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Harvesters - Precision Farming Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://mentormaya.github.io/Nepali-Calendar-Web-Component/src/nepali-calendar-web-component.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <style>
+        /* Glassmorphism and modern pro styles */
+        body {
+            background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+        }
+        .pro-card {
+            background: rgba(255,255,255,0.75);
+            border-radius: 22px;
+            box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.18);
+            padding: 2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .pro-card:hover {
+            box-shadow: 0 12px 40px 0 rgba(31,38,135,0.22);
+            transform: translateY(-2px) scale(1.01);
+        }
+        .pro-header {
+            background: linear-gradient(135deg, #3a7d44 60%, #4CAF50 100%);
+            border-radius: 22px;
+            padding: 2rem 2.5rem 1.5rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 24px 0 rgba(60,120,80,0.10);
+            margin-bottom: 2rem;
+        }
+        .pro-header .calendar-area {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
+        .pro-header .calendar-area nepali-calendar {
+            background: rgba(255,255,255,0.85);
+            border-radius: 16px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
+            padding: 0.5rem;
+        }
+        .pro-header .payment-btn {
+            background: linear-gradient(90deg, #2563eb 60%, #4f8cff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 8px 0 rgba(37,99,235,0.10);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .pro-header .payment-btn:hover {
+            background: linear-gradient(90deg, #1d4ed8 60%, #2563eb 100%);
+            box-shadow: 0 4px 16px 0 rgba(37,99,235,0.18);
+        }
+        .pro-sidebar {
+            background: rgba(255,255,255,0.7);
+            border-radius: 22px;
+            box-shadow: 0 4px 24px 0 rgba(31,38,135,0.10);
+            padding: 2rem 1.2rem 2rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            min-width: 90px;
+            height: 90vh;
+            margin-top: 1.5rem;
+        }
+        .pro-sidebar .sidebar-icon {
+            font-size: 2rem;
+            color: #3a7d44;
+            margin-bottom: 1.2rem;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .pro-sidebar .sidebar-icon:hover {
+            color: #2563eb;
+            transform: scale(1.15);
+        }
+        .pro-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #2d3748;
+            margin-bottom: 0.2rem;
+        }
+        .pro-desc {
+            font-size: 1.1rem;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+        .pro-section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pro-progress {
+            background: #e0eafc;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 16px;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 1px 4px 0 rgba(60,120,200,0.07);
+        }
+        .pro-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 60%, #3a7d44 100%);
+            transition: width 0.7s cubic-bezier(.4,2,.3,1);
+        }
+        .pro-animated {
+            animation: proFadeIn 0.7s cubic-bezier(.4,2,.3,1);
+        }
+        @keyframes proFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #chatbot-container.draggable { cursor: move; user-select: none; }
+        #chatbot-close-btn { position: absolute; top: 8px; right: 8px; background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; z-index: 10; }
+        #chatbot-reopen-btn { display: none; position: fixed; bottom: 4.5rem; left: 4.5rem; background: #2563eb; color: white; border-radius: 50%; width: 48px; height: 48px; font-size: 2rem; align-items: center; justify-content: center; z-index: 50; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Notification Area -->
+    <div id="notification-area" style="position:fixed;top:24px;right:24px;z-index:9999;"></div>
+    <div class="grid grid-cols-12 gap-6 px-8 pb-8">
+        <div class="col-span-3">
+            <div class="pro-card pro-animated">
+                <div class="pro-section-title"><i class="fas fa-seedling text-green-500"></i> Field Overview</div>
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-between"><span>Total Area:</span><span class="font-bold">5.2 ha</span></div>
+                    <div class="flex justify-between"><span>Crop Type:</span><span class="font-bold">Wheat</span></div>
+                    <div class="flex justify-between"><span>Growth Stage:</span><span class="font-bold">Vegetative</span></div>
+                </div>
+            </div>
+            <div class="pro-card pro-animated">
+                <div class="pro-section-title"><i class="fas fa-microchip text-blue-500"></i> IoT Nodes</div>
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>Node 1 (North Field)</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>Node 2 (East Field)</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>Node 3 (South Field)</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>Node 4 (West Field)</div>
+                </div>
+            </div>
+            <div class="pro-card pro-animated">
+                <div class="pro-section-title"><i class="fas fa-bolt text-yellow-500"></i> Quick Actions</div>
+                <button class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg mb-2 flex items-center justify-center transition-all"><i class="fas fa-tint mr-2"></i> Trigger Irrigation</button>
+                <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg mb-2 flex items-center justify-center transition-all"><i class="fas fa-drone-alt mr-2"></i> Schedule Drone Scan</button>
+                <button class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-all"><i class="fas fa-file-export mr-2"></i> Export Data</button>
+            </div>
+        </div>
+        <div class="col-span-6 flex flex-col gap-6">
+            <section class="pro-card pro-animated col-span-6" id="esp32-sensor-panel">
+                <div class="pro-section-title"><i class="fas fa-satellite-dish text-blue-500"></i> Real-Time ESP32 Sensor Data</div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center shadow-sm">
+                        <span class="text-gray-600">Soil Moisture</span>
+                        <div class="text-3xl font-bold my-2" id="moisture-value">--%</div>
+                        <div class="pro-progress"><div class="pro-progress-bar" id="moisture-bar" style="width:0%"></div></div>
+                        <span class="text-xs text-gray-500">Optimal: 40-60%</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center shadow-sm">
+                        <span class="text-gray-600">Temperature</span>
+                        <div class="text-3xl font-bold my-2" id="temperature-value">--°C</div>
+                        <div class="pro-progress"><div class="pro-progress-bar" id="temperature-bar" style="width:0%"></div></div>
+                        <span class="text-xs text-gray-500">Min: 18°C &nbsp; Max: 32°C</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center shadow-sm">
+                        <span class="text-gray-600">Humidity</span>
+                        <div class="text-3xl font-bold my-2" id="humidity-value">--%</div>
+                        <div class="pro-progress"><div class="pro-progress-bar" id="humidity-bar" style="width:0%"></div></div>
+                        <span class="text-xs text-gray-500">Optimal: 50-70%</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center shadow-sm">
+                        <span class="text-gray-600">Light Intensity</span>
+                        <div class="text-3xl font-bold my-2" id="light-value">--%</div>
+                        <div class="pro-progress"><div class="pro-progress-bar" id="light-bar" style="width:0%"></div></div>
+                        <span class="text-xs text-gray-500">Optimal: 60-80%</span>
+                    </div>
+                </div>
+            </section>
+            <div class="pro-card pro-animated">
+                <div class="pro-section-title"><i class="fas fa-brain text-purple-500"></i> Predictive Analytics</div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col shadow-sm">
+                        <span class="text-gray-600">Disease Risk Prediction</span>
+                        <span class="text-sm font-medium px-2 py-1 rounded bg-red-100 text-red-800 w-max">High Risk</span>
+                        <span class="text-sm text-gray-700 mt-2">Wheat Rust predicted with 78% confidence based on current conditions.</span>
+                        <span class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> Recommended: Apply fungicide within 48 hours</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col shadow-sm">
+                        <span class="text-gray-600">Water Requirement</span>
+                        <span class="text-sm font-medium px-2 py-1 rounded bg-blue-100 text-blue-800 w-max">Moderate</span>
+                        <canvas id="water-chart" height="80"></canvas>
+                        <span class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle mr-1"></i> Next irrigation recommended: Tomorrow 6 AM</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col shadow-sm">
+                        <span class="text-gray-600">Yield Estimation</span>
+                        <span class="text-sm font-medium">Current: 3.2 ton/ha</span>
+                        <div class="pro-progress"><div class="pro-progress-bar" style="width:64%"></div></div>
+                        <span class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> Projected final yield: 5.0 ± 0.7 ton/ha</span>
+                    </div>
+                </div>
+            </div>
+            <div class="pro-card pro-animated">
+                <div class="pro-section-title"><i class="fas fa-bell text-red-500"></i> Alerts & Notifications</div>
+                <div class="space-y-3 max-h-48 overflow-y-auto pr-2">
+                    <div class="bg-red-50 border-l-4 border-red-500 p-3 rounded-r-lg flex justify-between items-start"><div><p class="font-medium text-red-800">High Disease Risk Detected</p><p class="text-sm text-red-600">Wheat Rust predicted in North Field</p></div><span class="text-xs text-gray-500">10 min ago</span></div>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-r-lg flex justify-between items-start"><div><p class="font-medium text-yellow-800">Low Soil Moisture Alert</p><p class="text-sm text-yellow-600">South Field moisture below threshold</p></div><span class="text-xs text-gray-500">1 hour ago</span></div>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg flex justify-between items-start"><div><p class="font-medium text-blue-800">Drone Scan Completed</p><p class="text-sm text-blue-600">NDVI analysis available for review</p></div><span class="text-xs text-gray-500">2 hours ago</span></div>
+                    <div class="bg-gray-50 border-l-4 border-gray-500 p-3 rounded-r-lg flex justify-between items-start"><div><p class="font-medium text-gray-800">Irrigation Scheduled</p><p class="text-sm text-gray-600">System will water East Field at 5 AM</p></div><span class="text-xs text-gray-500">5 hours ago</span></div>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-3 rounded-r-lg flex justify-between items-start"><div><p class="font-medium text-green-800">Fertilizer Applied</p><p class="text-sm text-green-600">Nitrogen levels normalized in West Field</p></div><span class="text-xs text-gray-500">1 day ago</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-3 flex flex-col gap-6">
+            <div class="pro-card pro-animated">
+                <div class="pro-section-title"><i class="fas fa-drone text-green-500"></i> Drone Imaging (NDVI)</div>
+                <div class="mb-4">
+                    <div class="ndvi-image"></div>
+                    <div class="flex justify-between text-xs mt-1">
+                        <span class="text-red-600">Unhealthy</span>
+                        <span class="text-yellow-600">Stressed</span>
+                        <span class="text-green-600">Healthy</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center"><i class="fas fa-leaf leaflet leaflet-healthy mr-1"></i> Healthy: 68%</div>
+                    <div class="flex items-center"><i class="fas fa-leaf leaflet leaflet-stressed mr-1"></i> Stressed: 22%</div>
+                    <div class="flex items-center"><i class="fas fa-leaf leaflet leaflet-unhealthy mr-1"></i> Unhealthy: 10%</div>
+                </div>
+                <div class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle mr-1"></i> NDVI (Normalized Difference Vegetation Index) highlights crop health from drone imagery.</div>
+            </div>
+            <div class="pro-card pro-animated">
+                <div class="pro-section-title"><i class="fas fa-map-marked-alt text-blue-500"></i> GIS-Based Field Analysis</div>
+                <div id="map" class="w-full h-64 rounded-lg mb-2"></div>
+                <div class="flex justify-between text-xs">
+                    <span>Soil Variability</span>
+                    <span>Land Segmentation</span>
+                    <span>Crop Zones</span>
+                </div>
+                <div class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle mr-1"></i> Interactive map shows field zones, soil types, and crop variability.</div>
+            </div>
+        </div>
+    </div>
+    <!-- Chatbot UI -->
+    <div id="chatbot-container" class="fixed bottom-4 left-4 w-80 bg-white rounded-lg shadow-lg flex flex-col z-50" style="height: 400px;">
+        <div class="bg-blue-600 text-white px-4 py-2 rounded-t-lg font-bold">Ask the Chatbot</div>
+        <div id="chat-box" class="flex-1 overflow-y-auto p-4" style="max-height: 300px;"></div>
+        <div class="flex border-t px-2 py-2">
+            <input id="chat-input" type="text" class="flex-1 border rounded-l px-2 py-1 focus:outline-none" placeholder="Type your question...">
+            <button id="chat-send" class="bg-blue-600 text-white px-4 py-1 rounded-r">Send</button>
+        </div>
+    </div>
+    <!-- AI Modules -->
+    <div id="ai-modules" class="fixed bottom-4 right-4 w-96 bg-white rounded-lg shadow-lg flex flex-col z-50 mb-4" style="display:none;">
+        <div class="flex justify-between items-center bg-green-700 text-white px-4 py-2 rounded-t-lg font-bold">
+            <span>AI Disease Detection</span>
+            <button id="close-ai-modules" class="text-white text-xl font-bold">&times;</button>
+        </div>
+        <div class="p-4 space-y-4">
+            <div class="flex space-x-4">
+                <button id="potato-module-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">Potato Leaf Disease</button>
+                <button id="tomato-module-btn" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg">Tomato Leaf Disease</button>
+            </div>
+            <div id="ai-modal" class="mt-4" style="display:none;">
+                <div class="mb-2 font-semibold" id="ai-modal-title"></div>
+                <input type="file" id="ai-image-upload" accept="image/*" class="mb-2" />
+                <div id="ai-image-preview" class="mb-2"></div>
+                <button id="ai-analyze-btn" class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded mb-2" disabled>Analyze</button>
+                <div id="ai-result" class="text-sm mt-2"></div>
+            </div>
+        </div>
+    </div>
+    <button id="open-ai-modules" class="fixed bottom-4 right-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full shadow-lg z-50">AI Disease Detection</button>
+    <!-- Scripts for dynamic gauges, chart, and map -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="static/chatbot.js"></script>
+    <script>
+        // Update current time
+        function updateTime() {
+            document.getElementById('current-time').textContent = moment().format('dddd, MMMM Do YYYY, h:mm:ss A');
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Gauge fill logic for full circle
+        function setFullCircleGauge(id, value) {
+            const gauge = document.getElementById(id);
+            if (!gauge) return;
+            const fillInner = gauge.querySelector('.gauge-fill-inner');
+            if (!fillInner) return;
+            // value: 0-100, angle: 0-360
+            fillInner.style.background = gauge.classList.contains('bg-blue-500') ? '#3B82F6' : gauge.classList.contains('bg-green-500') ? '#22C55E' : '#F59E42';
+            fillInner.style.transform = `rotate(${(value / 100) * 360}deg)`;
+        }
+        setFullCircleGauge('moisture-gauge', 32);
+        setFullCircleGauge('humidity-gauge', 65);
+        setFullCircleGauge('light-gauge', 78);
+
+        // Water requirement chart
+        const ctx = document.getElementById('water-chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Water Need (%)',
+                    data: [60, 55, 70, 65, 80, 75, 60],
+                    borderColor: '#2196F3',
+                    backgroundColor: 'rgba(33,150,243,0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { min: 0, max: 100, ticks: { stepSize: 20 } }
+                }
+            }
+        });
+
+        // Leaflet map
+        const map = L.map('map').setView([27.7172, 85.3240], 15); // Kathmandu as example
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        // Example polygons for field zones
+        const field1 = L.polygon([
+            [27.718, 85.323],
+            [27.718, 85.325],
+            [27.716, 85.325],
+            [27.716, 85.323]
+        ], { color: '#4CAF50', fillOpacity: 0.3 }).addTo(map).bindPopup('Healthy Zone');
+        const field2 = L.polygon([
+            [27.717, 85.322],
+            [27.717, 85.323],
+            [27.715, 85.323],
+            [27.715, 85.322]
+        ], { color: '#FFC107', fillOpacity: 0.3 }).addTo(map).bindPopup('Stressed Zone');
+        const field3 = L.polygon([
+            [27.716, 85.324],
+            [27.716, 85.326],
+            [27.714, 85.326],
+            [27.714, 85.324]
+        ], { color: '#F44336', fillOpacity: 0.3 }).addTo(map).bindPopup('Unhealthy Zone');
+
+        // Language translations
+        const translations = {
+            en: {
+                'title-main': 'Tech Harvesters',
+                'title-desc': 'Precision Farming: AI & IoT Dashboard',
+                'field-status-label': 'Field Status:',
+                'field-status-value': 'Active',
+                'field-overview-label': 'Field Overview',
+                'total-area-label': 'Total Area:',
+                'crop-type-label': 'Crop Type:',
+                'growth-stage-label': 'Growth Stage:',
+                'iot-nodes-label': 'IoT Nodes',
+                'quick-actions-label': 'Quick Actions',
+                'trigger-irrigation-label': 'Trigger Irrigation',
+                'schedule-drone-label': 'Schedule Drone Scan',
+                'export-data-label': 'Export Data',
+                'sensor-data-label': 'Real-Time Sensor Data',
+                'sensor-data-title': 'Real-Time Sensor Data',
+                'soil-moisture-label': 'Soil Moisture',
+                'temperature-label': 'Temperature',
+                'humidity-label': 'Humidity',
+                'light-intensity-label': 'Light Intensity',
+                'predictive-analytics-label': 'Predictive Analytics',
+                'predictive-analytics-title': 'Predictive Analytics',
+                'disease-risk-label': 'Disease Risk Prediction',
+                'water-req-label': 'Water Requirement',
+                'yield-est-label': 'Yield Estimation',
+                'alerts-label': 'Alerts & Notifications',
+                'alerts-title': 'Alerts & Notifications',
+                'alerts-new': '3 New',
+                'drone-imaging-label': 'Drone Imaging (NDVI)',
+                'drone-imaging-title': 'Drone Imaging (NDVI)',
+                'gis-map-label': 'GIS-Based Field Analysis',
+                'gis-map-title': 'GIS-Based Field Analysis',
+                'moisture-optimal': 'Optimal: 40-60%',
+                'alert-disease': 'Wheat Rust predicted in North Field',
+            },
+            np: {
+                'title-main': 'टेक हार्भेस्टरस्',
+                'title-desc': 'सटीक कृषि: एआई र आइओटी ड्यासबोर्ड',
+                'field-status-label': 'फिल्ड स्थिति:',
+                'field-status-value': 'सक्रिय',
+                'field-overview-label': 'फिल्ड अवलोकन',
+                'total-area-label': 'कुल क्षेत्रफल:',
+                'crop-type-label': 'बाली प्रकार:',
+                'growth-stage-label': 'विकास चरण:',
+                'iot-nodes-label': 'आइओटी नोड्स',
+                'quick-actions-label': 'छिटो कार्यहरू',
+                'trigger-irrigation-label': 'सिंचाइ सुरु गर्नुहोस्',
+                'schedule-drone-label': 'ड्रोन स्क्यान तालिका',
+                'export-data-label': 'डाटा निर्यात गर्नुहोस्',
+                'sensor-data-label': 'रियल-टाइम सेन्सर डाटा',
+                'sensor-data-title': 'रियल-टाइम सेन्सर डाटा',
+                'soil-moisture-label': 'माटोको चिस्यान',
+                'temperature-label': 'तापक्रम',
+                'humidity-label': 'आर्द्रता',
+                'light-intensity-label': 'प्रकाश तीव्रता',
+                'predictive-analytics-label': 'पूर्वानुमान विश्लेषण',
+                'predictive-analytics-title': 'पूर्वानुमान विश्लेषण',
+                'disease-risk-label': 'रोग जोखिम पूर्वानुमान',
+                'water-req-label': 'पानी आवश्यकता',
+                'yield-est-label': 'उत्पादन अनुमान',
+                'alerts-label': 'सूचना र अलर्ट',
+                'alerts-title': 'सूचना र अलर्ट',
+                'alerts-new': '३ नयाँ',
+                'drone-imaging-label': 'ड्रोन इमेजिङ (NDVI)',
+                'drone-imaging-title': 'ड्रोन इमेजिङ (NDVI)',
+                'gis-map-label': 'GIS-आधारित फिल्ड विश्लेषण',
+                'gis-map-title': 'GIS-आधारित फिल्ड विश्लेषण',
+                'moisture-optimal': 'उत्तम: ४०-६०%',
+                'alert-disease': 'उत्तर फिल्डमा गहुँ रस्टको सम्भावना',
+            }
+        };
+        function setLanguage(lang) {
+            const dict = translations[lang] || translations['en'];
+            Object.keys(dict).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = dict[id];
+            });
+        }
+        document.getElementById('lang-switch').addEventListener('change', function(e) {
+            setLanguage(e.target.value);
+        });
+        // Set default language
+        setLanguage('en');
+
+        // Notification logic
+        function showNotification(message) {
+            const area = document.getElementById('notification-area');
+            const note = document.createElement('div');
+            note.className = 'bg-green-500 text-white px-4 py-2 rounded shadow mb-2 animate-bounce';
+            note.textContent = message;
+            area.appendChild(note);
+            setTimeout(() => {
+                note.remove();
+            }, 2500);
+        }
+
+        // Export Data logic
+        function exportData() {
+            // Example: Export sensor data as CSV
+            const rows = [
+                ['Sensor', 'Value'],
+                ['Soil Moisture', document.getElementById('moisture-value').textContent],
+                ['Temperature', document.getElementById('temperature-value').textContent],
+                ['Humidity', document.getElementById('humidity-value').textContent],
+                ['Light Intensity', document.getElementById('light-value').textContent],
+            ];
+            let csvContent = rows.map(e => e.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sensor_data.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Button actions with language support
+        const actionMessages = {
+            en: {
+                irrigation: 'Irrigation triggered!',
+                drone: 'Drone scan scheduled!',
+                export: 'Data exported!'
+            },
+            np: {
+                irrigation: 'सिंचाइ सुरु गरियो!',
+                drone: 'ड्रोन स्क्यान तालिका बनाइयो!',
+                export: 'डाटा निर्यात गरियो!'
+            }
+        };
+        function getLang() {
+            return document.getElementById('lang-switch').value;
+        }
+        document.getElementById('trigger-irrigation-btn').onclick = function() {
+            showNotification(actionMessages[getLang()].irrigation);
+        };
+        document.getElementById('schedule-drone-btn').onclick = function() {
+            showNotification(actionMessages[getLang()].drone);
+        };
+        document.getElementById('export-data-btn').onclick = function() {
+            exportData();
+            showNotification(actionMessages[getLang()].export);
+        };
+
+        // --- AI Disease Detection Modal Logic ---
+        const aiModules = document.getElementById('ai-modules');
+        const openAIModules = document.getElementById('open-ai-modules');
+        const closeAIModules = document.getElementById('close-ai-modules');
+        const potatoBtn = document.getElementById('potato-module-btn');
+        const tomatoBtn = document.getElementById('tomato-module-btn');
+        const aiModal = document.getElementById('ai-modal');
+        const aiModalTitle = document.getElementById('ai-modal-title');
+        const aiImageUpload = document.getElementById('ai-image-upload');
+        const aiImagePreview = document.getElementById('ai-image-preview');
+        const aiAnalyzeBtn = document.getElementById('ai-analyze-btn');
+        const aiResult = document.getElementById('ai-result');
+        let selectedModule = null;
+        openAIModules.onclick = () => { aiModules.style.display = 'block'; openAIModules.style.display = 'none'; };
+        closeAIModules.onclick = () => { aiModules.style.display = 'none'; openAIModules.style.display = 'block'; aiModal.style.display = 'none'; aiResult.textContent = ''; aiImagePreview.innerHTML = ''; aiImageUpload.value = ''; aiAnalyzeBtn.disabled = true; };
+        function openAIModule(module) {
+            selectedModule = module;
+            aiModal.style.display = 'block';
+            aiModalTitle.textContent = module === 'potato' ? 'Potato Leaf Disease Detection' : 'Tomato Leaf Disease Detection';
+            aiResult.textContent = '';
+            aiImagePreview.innerHTML = '';
+            aiImageUpload.value = '';
+            aiAnalyzeBtn.disabled = true;
+        }
+        potatoBtn.onclick = () => openAIModule('potato');
+        tomatoBtn.onclick = () => openAIModule('tomato');
+        aiImageUpload.onchange = function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    aiImagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="rounded shadow max-h-32">`;
+                };
+                reader.readAsDataURL(file);
+                aiAnalyzeBtn.disabled = false;
+            } else {
+                aiImagePreview.innerHTML = '';
+                aiAnalyzeBtn.disabled = true;
+            }
+        };
+        aiAnalyzeBtn.onclick = async function() {
+            aiResult.textContent = 'Analyzing...';
+            const file = aiImageUpload.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            // You may want to change the endpoint depending on your backend
+            let endpoint = '/predict';
+            if (selectedModule === 'potato') endpoint = '/predict_potato';
+            if (selectedModule === 'tomato') endpoint = '/predict_tomato';
+            try {
+                const res = await fetch(endpoint, { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('Failed to analyze');
+                const data = await res.json();
+                aiResult.innerHTML = `<b>Result:</b> ${data.class} <br><b>Confidence:</b> ${(data.confidence*100).toFixed(1)}%`;
+            } catch (err) {
+                aiResult.textContent = 'Error: ' + err.message;
+            }
+        };
+        // --- Chatbot Close/Reopen Logic ---
+        const chatbotContainer = document.getElementById('chatbot-container');
+        const chatbotCloseBtn = document.createElement('button');
+        chatbotCloseBtn.id = 'chatbot-close-btn';
+        chatbotCloseBtn.innerHTML = '&times;';
+        chatbotCloseBtn.onclick = function() {
+            chatbotContainer.style.display = 'none';
+            document.getElementById('chatbot-reopen-btn').style.display = 'flex';
+        };
+        chatbotContainer.appendChild(chatbotCloseBtn);
+        document.getElementById('chatbot-reopen-btn').onclick = function() {
+            chatbotContainer.style.display = 'flex';
+            this.style.display = 'none';
+        };
+        // --- Chatbot Drag Logic ---
+        (function() {
+            const chatbot = document.getElementById('chatbot-container');
+            const header = chatbot.querySelector('.bg-blue-600');
+            let isDragging = false, offsetX = 0, offsetY = 0;
+            header.style.cursor = 'move';
+            header.onmousedown = function(e) {
+                isDragging = true;
+                chatbot.classList.add('draggable');
+                offsetX = e.clientX - chatbot.getBoundingClientRect().left;
+                offsetY = e.clientY - chatbot.getBoundingClientRect().top;
+                document.onmousemove = function(e) {
+                    if (!isDragging) return;
+                    chatbot.style.left = (e.clientX - offsetX) + 'px';
+                    chatbot.style.top = (e.clientY - offsetY) + 'px';
+                    chatbot.style.right = 'auto';
+                    chatbot.style.bottom = 'auto';
+                    chatbot.style.position = 'fixed';
+                };
+                document.onmouseup = function() {
+                    isDragging = false;
+                    chatbot.classList.remove('draggable');
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                };
+            };
+        })();
+
+        // Payment modal logic
+        const openPayBtn = document.getElementById('open-payment-modal');
+        const closePayBtn = document.getElementById('close-payment-modal');
+        const payModal = document.getElementById('payment-modal');
+        const payForm = document.getElementById('payment-form');
+        const paySuccess = document.getElementById('payment-success');
+        openPayBtn.onclick = () => { payModal.style.display = 'flex'; };
+        closePayBtn.onclick = () => { payModal.style.display = 'none'; paySuccess.style.display = 'none'; };
+        payForm.onsubmit = e => {
+            e.preventDefault();
+            paySuccess.style.display = 'block';
+            setTimeout(() => { payModal.style.display = 'none'; paySuccess.style.display = 'none'; }, 2000);
+        };
+
+        // --- Firebase Config for Q&A ---
+        const firebaseConfigChat = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfigChat);
+        const dbChat = firebase.database();
+
+        // --- Chatbot Q&A Logic ---
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatBox = document.getElementById('chat-box');
+        function appendMessage(msg, from) {
+            const div = document.createElement('div');
+            div.className = from === 'user' ? 'text-right mb-2' : 'text-left mb-2';
+            div.innerHTML = `<span class="inline-block px-3 py-2 rounded-lg ${from==='user'?'bg-blue-100 text-blue-800':'bg-gray-200 text-gray-800'}">${msg}</span>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        function getAnswerFromDB(question, cb) {
+            dbChat.ref('chatbot_qna/' + btoa(question)).once('value', snap => {
+                cb(snap.val());
+            });
+        }
+        function saveQnA(question, answer) {
+            dbChat.ref('chatbot_qna/' + btoa(question)).set(answer);
+        }
+        function generateAnswer(question) {
+            // Placeholder: Replace with your AI/logic or API call
+            return "Sorry, I don't know the answer yet. (You can connect this to an AI API)";
+        }
+        chatSend.onclick = function() {
+            const q = chatInput.value.trim();
+            if (!q) return;
+            appendMessage(q, 'user');
+            chatInput.value = '';
+            getAnswerFromDB(q, function(ans) {
+                if (ans) {
+                    appendMessage(ans, 'bot');
+                } else {
+                    const answer = generateAnswer(q);
+                    appendMessage(answer, 'bot');
+                    saveQnA(q, answer);
+                }
+            });
+        };
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') chatSend.click();
+        });
+
+        // Listen for real-time sensor data updates
+        function updateSensorUI(data) {
+            if (data.moisture !== undefined) {
+                document.getElementById('moisture-value').textContent = data.moisture + '%';
+                document.getElementById('moisture-bar').style.width = data.moisture + '%';
+            }
+            if (data.temperature !== undefined) {
+                document.getElementById('temperature-value').textContent = data.temperature + '°C';
+                document.getElementById('temperature-bar').style.width = (data.temperature / 40 * 100) + '%';
+            }
+            if (data.humidity !== undefined) {
+                document.getElementById('humidity-value').textContent = data.humidity + '%';
+                document.getElementById('humidity-bar').style.width = data.humidity + '%';
+            }
+            if (data.light !== undefined) {
+                document.getElementById('light-value').textContent = data.light + '%';
+                document.getElementById('light-bar').style.width = data.light + '%';
+            }
+        }
+        // Replace 'sensors/latest' with your actual Firebase path
+        const sensorRef = db.ref('sensors/latest');
+        sensorRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) updateSensorUI(data);
+        });
+    </script>
+</body>
+</html>

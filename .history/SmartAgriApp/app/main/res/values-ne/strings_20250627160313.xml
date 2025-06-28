@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">स्मार्ट कृषि एप</string>
+    <string name="dashboard">ड्यासबोर्ड</string>
+    <string name="iot_sensor">आईओटी सेन्सर</string>
+    <string name="crop_recommendation">बाली सिफारिस</string>
+    <string name="disease_detection">रोग पहिचान</string>
+    <string name="irrigation_alert">सिचाइ सूचना</string>
+    <string name="marketplace">बजार</string>
+    <string name="language_toggle">भाषा परिवर्तन</string>
+    <string name="payment">भुक्तानी</string>
+    <string name="receipt">रसिद</string>
+    <string name="add_to_cart">कार्टमा थप्नुहोस्</string>
+    <string name="proceed_to_payment">भुक्तानीमा जानुहोस्</string>
+    <string name="success">सफलता</string>
+    <string name="english">English</string>
+    <string name="nepali">नेपाली</string>
+</resources> 
