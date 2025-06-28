@@ -6,7 +6,8 @@ An interactive, real-time dashboard built for precision agriculture using ESP32,
 ## 🚀 Features
 
 - 📍 *Field Overview Panel*  
-  View total area, crop type, growth stage, and pesticide usage.
+  View total area
+, crop type, growth stage, and pesticide usage.
 
 - 📡 *IoT Node Status*  
   Live connectivity status for Irrigation Node, Drone Node, and Sensor Node.
@@ -64,3 +65,4 @@ run login.html
 create a firebase domain and connect the api's
 
 
+![WhatsApp Image 2025-06-28 at 11 17 11_ad724e16](https://github.com/user-attachments/assets/23468b89-e51b-4f43-8f1a-40c2480cf1ba)
